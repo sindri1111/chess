@@ -1,3 +1,5 @@
+import 'package:chess_tryout/pieceClass.dart';
+
 import 'checkBoard.dart';
 
 class Piece {
@@ -11,6 +13,7 @@ class Piece {
 }
 
 class Pawn extends Piece{
+
 
 
 

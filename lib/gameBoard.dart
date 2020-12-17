@@ -42,14 +42,14 @@ class _GameBoardState extends State<GameBoard> {
 }
 
 Widget createBoard(
-  List<List<ChessPieceAct>> gameTiles,Function activateTile,
+  List<List<ChessPieceObj>> gameTiles,Function activateTile,
     Function movePiece, Function deActivateAllTiles
 
 ) {
 
   List<Widget> col = [];
 
-  int count = 0;
+  int count = 0; //this int is used for the tileColor function, Check documentation :)
 
   for(int i = 0; i < gameTiles.length; i++){
     List<Widget> row = [];
@@ -83,28 +83,10 @@ Widget createBoard(
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//This function below comes in good use when i'm printing out the color of the tiles,
+//since every other tile has either a dark or a light tile you could say that
+//the light tile gets an even number and the dark tile gets an odd number, but unfortunately
+//every  other row is also different so i made this function just to make the createBoard() function more readable :)
 
 bool tileColor(int row, int counter) {
 

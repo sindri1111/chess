@@ -5,8 +5,10 @@ void main() {
   runApp(MyApp());
 }
 
+// This is the root of the application
+
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
