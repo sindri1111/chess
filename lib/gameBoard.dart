@@ -68,17 +68,20 @@ Widget createBoard(
             pieceColor: gameTiles[i][j].pieceColor,
 
           ),
+
       );
       count++;
     }
     col.add(
         Row(children: row, mainAxisAlignment: MainAxisAlignment.center,
         ),
+
     );
 
   }
   return Column(
     children: col, mainAxisAlignment: MainAxisAlignment.center,
+
   );
 
 }

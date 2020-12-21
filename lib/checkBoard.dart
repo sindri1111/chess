@@ -6,6 +6,10 @@ import 'ChessPiecesClasses.dart';
 class CheckerEngine {
   List<List<ChessPieceObj>> gameBoard = [];
   int moveCount = 0;
+  bool whiteKingHasMoved = false;
+  bool blackKingHasMoved = false;
+
+
 
   CheckerEngine() {
     initializeEmptyTiles();
@@ -106,7 +110,7 @@ class CheckerEngine {
     }
     if (gameBoard[row][col].piece != ChessPiece.empty) {
       if (gameBoard[row][col].pieceColor == PieceColor.white &&
-          whiteToMove() == true) {
+          whiteToMove() == true ) {
         gameBoard[row][col].isActive = true;
       } else if (gameBoard[row][col].pieceColor == PieceColor.black &&
           whiteToMove() == false) {
@@ -187,6 +191,9 @@ class CheckerEngine {
       }
     }
 
+
+
+
     //--------------Legal moves for white pawn---------------//
 
     if (gameBoard[activeRow][activeCol].piece == ChessPiece.wPawn) {
@@ -194,10 +201,14 @@ class CheckerEngine {
         return true;
       }
       if (gameBoard[activeRow - 1][activeCol].pieceColor == PieceColor.black) {
-        // this checks to see if there is a,
-        return false; //piece in front of the pawn, if so the pawn cant move forward
+        // this checks to see if there is a piece in front of the pawn, if so the pawn cant move forward
+        return false; //
       }
       if (col == activeCol) {
+        if(activeRow == 1 && row == 0 && gameBoard[row][col].piece == ChessPiece.empty){
+          // Queens the pawn if it reaches the right destination
+          gameBoard[activeRow][activeCol].piece = ChessPiece.wQueen;
+        }
         if (activeRow == 6) {
           //This checks to see if the white pawn is on row 6,
           if (row == activeRow - 2 || row == activeRow - 1) {
@@ -225,6 +236,9 @@ class CheckerEngine {
         return false;
       }
       if (col == activeCol) {
+        if(activeRow == 6 && row == 6){
+          gameBoard[activeRow][activeCol].piece = ChessPiece.bQueen;
+        }
         //these conditionals are basically the same as,
         if (activeRow == 1) {
           //the white pawn conditionals but inverted.
@@ -277,6 +291,66 @@ class CheckerEngine {
 
     if (gameBoard[activeRow][activeCol].piece == ChessPiece.wRook ||
         gameBoard[activeRow][activeCol].piece == ChessPiece.bRook) {
+      //loops through the row that the rook wants to move in and checks if there are any pieces,
+      //in between the location where he is and where he wants to go to, if there is then legalMove returns false
+      if (row == activeRow) {
+        for (int i = col + 1; i < activeCol; i++) {
+          if (gameBoard[row][i].piece != ChessPiece.empty) {
+            return false;
+          }
+        }
+        for (int i = activeCol + 1; i < col; i++) {
+          if (gameBoard[row][i].piece != ChessPiece.empty) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+      // does the same as above but just loops through the column instead
+      if (activeCol == col) {
+        for (int i = row + 1; i < activeRow; i++) {
+          if (gameBoard[i][col].piece != ChessPiece.empty) {
+            return false;
+          }
+        }
+        for (int i = activeRow + 1; i < row; i++) {
+          if (gameBoard[i][col].piece != ChessPiece.empty) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+
+      return false;
+    }
+
+    //--------------Legal moves for white and black bishop---------------//
+
+    if (gameBoard[activeRow][activeCol].piece == ChessPiece.wBishop ||
+        gameBoard[activeRow][activeCol].piece == ChessPiece.bBishop) {
+      if (getDiagonal(row, col, activeRow, activeCol, true)) { //check getDiagonal documentation
+        return true;
+      }
+      if (getDiagonal(row, col, activeRow, activeCol, false)) {
+        return true;
+      }
+
+      return false;
+    }
+
+    //--------------Legal moves for white and black Queen---------------//
+    if (gameBoard[activeRow][activeCol].piece == ChessPiece.wQueen ||
+        gameBoard[activeRow][activeCol].piece == ChessPiece.bQueen) {
+      //uses the same algorithms as the bishops and rooks use
+
+      if (getDiagonal(row, col, activeRow, activeCol, true)) {
+        return true;
+      }
+      if (getDiagonal(row, col, activeRow, activeCol, false)) {
+        return true;
+      }
       if (row == activeRow) {
         for (int i = col + 1; i < activeCol; i++) {
           if (gameBoard[row][i].piece != ChessPiece.empty) {
@@ -308,24 +382,18 @@ class CheckerEngine {
 
       return false;
     }
+    //--------------Legal moves for white and black King---------------//
 
-    //--------------Legal moves for white and black bishop---------------//
+    if (gameBoard[activeRow][activeCol].piece == ChessPiece.wKing ||
+        gameBoard[activeRow][activeCol].piece == ChessPiece.bKing) {
 
-    if (gameBoard[activeRow][activeCol].piece == ChessPiece.wBishop ||
-        gameBoard[activeRow][activeCol].piece == ChessPiece.bBishop) {
-      if (getDiagonal(row, col, activeRow, activeCol, true)) {
+
+      if (kingLegalMoves(row, col, activeRow, activeCol,
+          gameBoard[activeRow][activeCol].pieceColor)) {
         return true;
       }
-      if (getDiagonal(row, col, activeRow, activeCol, false)) {
-        return true;
-      }
 
-      return false;
-    }
 
-    //--------------Legal moves for white and black Queen---------------//
-    if (gameBoard[activeRow][activeCol].piece == ChessPiece.wQueen ||
-        gameBoard[activeRow][activeCol].piece == ChessPiece.bQueen) {
       return false;
     }
 
@@ -338,6 +406,13 @@ class CheckerEngine {
 
   bool getWhitePawnKillTarget(int row, int col, int activeRow, int activeCol) {
     if (gameBoard[row][col].pieceColor == PieceColor.black) {
+      if (row == activeRow - 1 && col == activeCol - 1 && activeRow == 1) {
+        gameBoard[activeRow][activeCol].piece = ChessPiece.wQueen;
+        return true;
+      } else if (row == activeRow - 1 && col == activeCol + 1 && activeRow == 1) {
+        gameBoard[activeRow][activeCol].piece = ChessPiece.wQueen;
+        return true;
+      }
       if (row == activeRow - 1 && col == activeCol - 1) {
         return true;
       } else if (row == activeRow - 1 && col == activeCol + 1) {
@@ -347,9 +422,15 @@ class CheckerEngine {
       return false;
     }
   }
-
   bool getBlackPawnKillTarget(int row, int col, int activeRow, int activeCol) {
     if (gameBoard[row][col].pieceColor == PieceColor.white) {
+      if (row == activeRow + 1 && col == activeCol + 1 && activeRow == 6) {
+        gameBoard[activeRow][activeCol].piece = ChessPiece.bQueen;
+        return true;
+      } else if (row == activeRow + 1 && col == activeCol - 1 && activeRow == 6) {
+        gameBoard[activeRow][activeCol].piece = ChessPiece.bQueen;
+        return true;
+      }
       if (row == activeRow + 1 && col == activeCol + 1) {
         return true;
       } else if (row == activeRow + 1 && col == activeCol - 1) {
@@ -360,22 +441,149 @@ class CheckerEngine {
     }
   }
 
+
+
+  bool kingLegalMoves(
+      int row, int col, int activeRow, int activeCol, PieceColor pieceColor) {
+    bool isLegal = false;
+
+    //up
+    if (row == activeRow - 1 && col == activeCol) {
+      isLegal = true;
+    }
+    //down
+    if (row == activeRow + 1 && col == activeCol) {
+      isLegal = true;
+    }
+    //up right
+    if (row == activeRow - 1 && col == activeCol + 1) {
+      isLegal = true;
+    }
+    //up left
+    if (row == activeRow - 1 && col == activeCol - 1) {
+      isLegal = true;
+    }
+    //left
+    if (row == activeRow && col == activeCol - 1) {
+      isLegal = true;
+    }
+    //right
+    if (row == activeRow && col == activeCol + 1) {
+      isLegal = true;
+    }
+    //down left
+    if (row == activeRow + 1 && col == activeCol - 1) {
+      isLegal = true;
+    }
+    //down right
+    if (row == activeRow + 1 && col == activeCol + 1) {
+      isLegal = true;
+    }
+    //this algorithm below allows the kings to castle either king or queen side,
+    //they are only allowed to castle if they have not moved and if there are no,
+    //pieces between the rook and king
+    if (gameBoard[activeRow][activeCol].piece == ChessPiece.wKing) {
+      if (activeRow == row && col == activeCol + 2) {
+        if (whiteKingHasMoved == false) {
+          if (gameBoard[7][5].piece == ChessPiece.empty &&
+              gameBoard[7][6].piece == ChessPiece.empty &&
+              gameBoard[7][7].piece == ChessPiece.wRook) {
+            gameBoard[7][7].piece = ChessPiece.empty;
+            gameBoard[7][7].pieceColor = PieceColor.empty;
+            gameBoard[7][5].piece = ChessPiece.wRook;
+            gameBoard[7][5].pieceColor = PieceColor.white;
+            isLegal = true;
+          }
+        }
+      }
+      if (activeRow == row && col == activeCol - 2) {
+        if (whiteKingHasMoved == false) {
+          if (gameBoard[7][3].piece == ChessPiece.empty &&
+              gameBoard[7][2].piece == ChessPiece.empty &&
+              gameBoard[7][1].piece == ChessPiece.empty &&
+              gameBoard[7][0].piece == ChessPiece.wRook) {
+            gameBoard[7][0].piece = ChessPiece.empty;
+            gameBoard[7][0].pieceColor = PieceColor.empty;
+            gameBoard[7][3].piece = ChessPiece.wRook;
+            gameBoard[7][3].pieceColor = PieceColor.white;
+            isLegal = true;
+          }
+        }
+      }
+    }
+    if (gameBoard[activeRow][activeCol].piece == ChessPiece.bKing) {
+      if (activeRow == row && col == activeCol + 2) {
+        if (blackKingHasMoved == false) {
+          if (gameBoard[0][5].piece == ChessPiece.empty &&
+              gameBoard[0][6].piece == ChessPiece.empty &&
+              gameBoard[0][7].piece == ChessPiece.bRook) {
+            gameBoard[0][7].piece = ChessPiece.empty;
+            gameBoard[0][7].pieceColor = PieceColor.empty;
+            gameBoard[0][5].piece = ChessPiece.bRook;
+            gameBoard[0][5].pieceColor = PieceColor.black;
+            isLegal = true;
+          }
+        }
+      }
+      if (activeRow == row && col == activeCol - 2) {
+        if (blackKingHasMoved == false) {
+          if (gameBoard[0][3].piece == ChessPiece.empty &&
+              gameBoard[0][2].piece == ChessPiece.empty &&
+              gameBoard[0][1].piece == ChessPiece.empty &&
+              gameBoard[0][0].piece == ChessPiece.bRook) {
+            gameBoard[0][0].piece = ChessPiece.empty;
+            gameBoard[0][0].pieceColor = PieceColor.empty;
+            gameBoard[0][3].piece = ChessPiece.bRook;
+            gameBoard[0][3].pieceColor = PieceColor.black;
+            isLegal = true;
+          }
+        }
+      }
+    }
+
+
+    //If everything is legal above and the king is about to move,
+    //then these statement below tell the program that the king has moved,
+    // and therefor the king cannot castle
+    if (pieceColor == PieceColor.white && isLegal == true) {
+      whiteKingHasMoved = true;
+    }
+    if (pieceColor == PieceColor.black && isLegal == true) {
+      blackKingHasMoved = true;
+    }
+    return isLegal;
+  }
+
+
+
+//the getDiagonal function was by far the challenging function
+
   bool getDiagonal(
       int row, int col, int activeRow, int activeCol, bool forward) {
     List<ChessPiece> chessPieceDiagList = [];
 
+
+
     List<int> rowCol;
+    //the rowColLoop function gives the activeRow and the activeCol a -1 increment,
+    //until either one reaches 0, then we get the index of where to start the diagonal loop,
+    //to get the other diagonal i just flip the board
     if (!forward) {
       rowCol = rowColLoop(activeRow, 7 - activeCol);
     } else {
       rowCol = rowColLoop(activeRow, activeCol);
     }
 
+
     int x = rowCol[0];
     int y = rowCol[1];
 
     bool isLegal = false;
 
+
+    //this is where i start adding all of the pieces to the diagonal list,
+    //if the location that user is trying to move the piece to has the the right index,
+    //then the isLegal boolean becomes true
     while (true) {
       if (forward) {
         chessPieceDiagList.add(gameBoard[x][y].piece);
@@ -404,6 +612,9 @@ class CheckerEngine {
       }
     }
 
+
+    //if the the piece is being moved in the right diagonal then it passes the diagonal list into,
+    //another function, check the documentation on the ChecksPieceList function
     if (isLegal == true) {
       if (!checksPieceList(chessPieceDiagList, row, col, activeRow, activeCol,
           gameBoard[activeRow][activeCol].piece)) {
@@ -414,10 +625,15 @@ class CheckerEngine {
     return isLegal;
   }
 
+
+  //this function below loops through the diagonal list and checks the pieces,
+  //in between the active piece and where it wants to go, if there are no pieces in between,
+  //then the move is legal and the function returns a true statement
+
   bool checksPieceList(List<ChessPiece> diagList, int row, int col,
       int activeRow, int activeCol, ChessPiece activePiece) {
-
     List<ChessPiece> inBetweenList = [];
+    List<ChessPiece> finishedList = [];
 
     if (row > activeRow) {
       for (int i = 0; i < diagList.length; i++) {
@@ -432,18 +648,37 @@ class CheckerEngine {
           break;
         }
       }
+      for (int i = 0; i < row - activeRow; i++) {
+        finishedList.add(inBetweenList[i]);
+      }
+
+      for (int i = 1; i < finishedList.length; i++) {
+        if (finishedList[i] != ChessPiece.empty) {
+          return false;
+        }
+      }
     }
+    if (row < activeRow) {
+      for (int i = diagList.length - 1; i >= 0; i--) {
+        if (diagList[i] == activePiece) {
+          int j = i;
+          while (j >= 0) {
+            inBetweenList.add(diagList[j]);
 
-    List<ChessPiece> finishedList = [];
+            j--;
+          }
 
-    for (int i = 0; i < row - finishedList.length - 1; i++) {
-      finishedList.add(inBetweenList[i]);
-    }
+          break;
+        }
+      }
+      for (int i = 0; i < activeRow - row; i++) {
+        finishedList.add(inBetweenList[i]);
+      }
 
-
-    for (int i = 1; i < finishedList.length; i++) {
-      if(finishedList[i] != ChessPiece.empty) {
-        return false;
+      for (int i = 1; i < finishedList.length; i++) {
+        if (finishedList[i] != ChessPiece.empty) {
+          return false;
+        }
       }
     }
 
@@ -512,57 +747,3 @@ enum PieceColor {
   empty,
 }
 
-//shit algorithm if all else fails
-
-/*
-      if(row > activeRow && col > activeCol){ //down right
-        if(row == activeRow + 1 && col == activeCol + 1) {
-          return true;
-        }
-        if(row == activeRow + 2 && col == activeCol + 2) {
-          return true;
-        }
-        if(row == activeRow + 3 && col == activeCol + 3) {
-          return true;
-        }
-        if(row == activeRow + 4 && col == activeCol + 4) {
-          return true;
-        }
-        if(row == activeRow + 5 && col == activeCol + 5) {
-          return true;
-        }
-        if(row == activeRow + 6 && col == activeCol + 6) {
-          return true;
-        }
-        if(row == activeRow + 7 && col == activeCol + 7) {
-          return true;
-        }
-      }
-      if(row > activeRow && col < activeCol){
-        if(row == activeRow + 1 && col == activeCol - 1) {
-          return true;
-        }
-        if(row == activeRow + 2 && col == activeCol - 2) {
-          return true;
-        }
-        if(row == activeRow + 3 && col == activeCol - 3) {
-          return true;
-        }
-        if(row == activeRow + 4 && col == activeCol - 4) {
-          return true;
-        }
-        if(row == activeRow + 5 && col == activeCol - 5) {
-          return true;
-        }
-        if(row == activeRow + 6 && col == activeCol - 6) {
-          return true;
-        }
-        if(row == activeRow + 7 && col == activeCol - 7) {
-          return true;
-        }
-
-      }
-
-
-
- */
