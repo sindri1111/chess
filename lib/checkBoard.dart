@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 //import 'package:secondchess/pieceClass.dart';
 
-import 'ChessPiecesClasses.dart';
+
 
 class CheckerEngine {
   List<List<ChessPieceObj>> gameBoard = [];
