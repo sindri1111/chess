@@ -556,6 +556,8 @@ class CheckerEngine {
 
 
 
+
+
 //the getDiagonal function was by far the challenging function
 
   bool getDiagonal(
@@ -716,8 +718,7 @@ class CheckerEngine {
 class ChessPieceObj {
   //This is the main class for all of the pieces in the list
 
-  ChessPiece
-      piece; //This is used to tell each piece what moves they are allowed to make
+  ChessPiece piece; //This is used to tell each piece what moves they are allowed to make
   bool isActive; //This boolean is important as it is used to move each piece
   PieceColor
       pieceColor; //This one basically divides the pieces in separate teams of black and white, and of course white pieces can only capture black pieces and vice versa
